@@ -4,13 +4,42 @@ use tracing::info;
 
 mod cron;
 mod db;
+mod github;
 mod jobs;
 mod routes;
+
+#[derive(Clone, Debug)]
+pub struct GithubApp {
+    pub client_id: String,
+    pub client_secret: String,
+    pub private_key: String,
+    pub installation_id: String,
+    pub app_id: String,
+}
+
+impl GithubApp {
+    pub fn from_env() -> cja::Result<Self> {
+        let client_id = std::env::var("GITHUB_APP_CLIENT_ID")?;
+        let client_secret = std::env::var("GITHUB_APP_CLIENT_SECRET")?;
+        let private_key = std::env::var("GITHUB_APP_PRIVATE_KEY")?;
+        let installation_id = std::env::var("GITHUB_APP_INSTALLATION_ID")?;
+        let app_id = std::env::var("GITHUB_APP_ID")?;
+
+        Ok(Self {
+            client_id,
+            client_secret,
+            private_key,
+            installation_id,
+            app_id,
+        })
+    }
+}
 
 #[derive(Clone, Debug)]
 struct AppState {
     db: sqlx::PgPool,
     cookie_key: cja::server::cookies::CookieKey,
+    github_app: GithubApp,
 }
 
 impl AS for AppState {
@@ -47,6 +76,7 @@ async fn _main() -> cja::Result<()> {
     let app_state = AppState {
         db: db_pool,
         cookie_key,
+        github_app: GithubApp::from_env()?,
     };
 
     let app = routes::routes(app_state.clone());
