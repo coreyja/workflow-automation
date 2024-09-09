@@ -7,6 +7,7 @@ use axum::{
 use cja::app_state;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
+use tracing::info;
 
 use crate::{
     github::{get_access_token, validate_github_oidc_jwt, GithubPr},
@@ -40,6 +41,7 @@ pub async fn create_pr(
     State(app_state): State<AppState>,
     Json(payload): Json<CreatePrPayload>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
+    info!(jwt = payload.github_oidc_jwt, "Validating JWT");
     if validate_github_oidc_jwt(&payload.github_oidc_jwt)
         .await
         .is_err()
