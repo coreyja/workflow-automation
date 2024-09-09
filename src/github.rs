@@ -108,7 +108,7 @@ pub async fn validate_github_oidc_jwt(jwt: &str) -> cja::Result<()> {
         .map_err(|e| eyre::eyre!("Failed to get JWTs: {e}"))?;
     //TODO: Don't hardcode this
     std::env::set_var("GITHUB_ORG", "coreyja");
-    std::env::set_var("GITHUB_REPO", "coreyja.com");
+    std::env::set_var("GITHUB_REPO", "coreyja/coreyja.com");
 
     validate_github_token(jwt, Arc::new(RwLock::new(jwks)), None)
         .await
