@@ -111,7 +111,7 @@ pub async fn validate_github_oidc_jwt(jwt: &str) -> cja::Result<()> {
     };
 
     jwks.validate_github_token(jwt, &config)
-        .context("Failed to validate JWT")?;
+        .wrap_err("Failed to validate JWT")?;
     Ok(())
 }
 

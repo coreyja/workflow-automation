@@ -41,7 +41,7 @@ pub async fn create_pr(
     Json(payload): Json<CreatePrPayload>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     if let Err(e) = validate_github_oidc_jwt(&payload.github_oidc_jwt).await {
-        error!("Invalid GitHub OIDC JWT: {e}");
+        error!("Invalid GitHub OIDC JWT: {e:?}");
 
         return Err((
             StatusCode::UNAUTHORIZED,
