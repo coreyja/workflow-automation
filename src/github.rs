@@ -16,6 +16,7 @@
 //   iss: "YOUR_CLIENT_ID"
 // }
 
+use eyre::Context;
 use github_oidc::{fetch_jwks, GitHubOIDCConfig};
 use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
@@ -101,10 +102,7 @@ pub async fn create_pr(
 pub async fn validate_github_oidc_jwt(jwt: &str) -> cja::Result<()> {
     let jwks = fetch_jwks("https://token.actions.githubusercontent.com")
         .await
-        .map_err(|e| eyre::eyre!("Failed to get JWTs: {e}"))?;
-    //TODO: Don't hardcode this
-    std::env::set_var("GITHUB_ORG", "coreyja");
-    std::env::set_var("GITHUB_REPO", "coreyja/coreyja.com");
+        .context("Failed to get JWTs")?;
 
     let config = GitHubOIDCConfig {
         audience: None,
@@ -113,7 +111,7 @@ pub async fn validate_github_oidc_jwt(jwt: &str) -> cja::Result<()> {
     };
 
     jwks.validate_github_token(jwt, &config)
-        .map_err(|e| eyre::eyre!("Failed to validate JWT: {e}"))?;
+        .context("Failed to validate JWT")?;
     Ok(())
 }
 

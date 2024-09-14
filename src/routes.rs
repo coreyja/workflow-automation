@@ -6,6 +6,7 @@ use axum::{
 };
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
+use tracing::{error, info};
 
 use crate::{
     github::{get_access_token, validate_github_oidc_jwt, GithubPr},
@@ -39,10 +40,9 @@ pub async fn create_pr(
     State(app_state): State<AppState>,
     Json(payload): Json<CreatePrPayload>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
-    if validate_github_oidc_jwt(&payload.github_oidc_jwt)
-        .await
-        .is_err()
-    {
+    if let Err(e) = validate_github_oidc_jwt(&payload.github_oidc_jwt).await {
+        error!("Invalid GitHub OIDC JWT: {e}");
+
         return Err((
             StatusCode::UNAUTHORIZED,
             "Invalid GitHub OIDC JWT".to_string(),
@@ -52,6 +52,8 @@ pub async fn create_pr(
     let access_token = match get_access_token(&app_state).await {
         Ok(access_token) => access_token,
         Err(e) => {
+            error!("Failed to get access token: {e}");
+
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Failed to get access token: {}", e),
@@ -66,18 +68,23 @@ pub async fn create_pr(
         base: payload.base_branch,
     };
 
-    let Ok(pr) = crate::github::create_pr(
+    let pr = match crate::github::create_pr(
         &access_token,
         &payload.owner,
         &payload.repo,
         pr_to_create.clone(),
     )
     .await
-    else {
-        return Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Failed to create PR".to_string(),
-        ));
+    {
+        Ok(pr) => pr,
+        Err(e) => {
+            error!("Failed to create PR: {e}");
+
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to create PR".to_string(),
+            ));
+        }
     };
 
     match crate::github::auto_merge_pr(
@@ -91,9 +98,11 @@ pub async fn create_pr(
     {
         Ok(()) => {}
         Err(e) => {
+            error!("Failed to auto merge PR: {e}");
+
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Failed to auto merge PR: {}", e),
+                "Failed to auto merge PR".to_string(),
             ));
         }
     }
