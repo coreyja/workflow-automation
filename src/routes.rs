@@ -6,7 +6,7 @@ use axum::{
 };
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
-use tracing::{error, info};
+use tracing::error;
 
 use crate::{
     github::{get_access_token, validate_github_oidc_jwt, GithubPr},

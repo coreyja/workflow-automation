@@ -784,8 +784,7 @@ checksum = "4271d37baee1b8c7e4b708028c57d816cf9d2434acb33a549475f78c181f6253"
 [[package]]
 name = "github-oidc"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18d79c2f037a4a8c950982df5d254dad6d59347332307abb40eac827fe9f757d"
+source = "git+https://github.com/coreyja/github-oidc?branch=ca/main/fix-claims#eea70fc506446bafd5480b395add6fc2731f7c18"
 dependencies = [
  "anyhow",
  "jsonwebtoken",
