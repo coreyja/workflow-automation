@@ -16,14 +16,10 @@
 //   iss: "YOUR_CLIENT_ID"
 // }
 
-use std::sync::Arc;
-
-use cja::color_eyre::eyre::{ContextCompat as _, OptionExt};
-use github_oidc::{fetch_jwks, validate_github_token};
+use github_oidc::{fetch_jwks, GitHubOIDCConfig};
 use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use tokio::sync::RwLock;
 
 use crate::AppState;
 
@@ -110,8 +106,13 @@ pub async fn validate_github_oidc_jwt(jwt: &str) -> cja::Result<()> {
     std::env::set_var("GITHUB_ORG", "coreyja");
     std::env::set_var("GITHUB_REPO", "coreyja/coreyja.com");
 
-    validate_github_token(jwt, Arc::new(RwLock::new(jwks)), None)
-        .await
+    let config = GitHubOIDCConfig {
+        audience: None,
+        repository: Some("coreyja/coreyja.com".to_string()),
+        repository_owner: Some("coreyja".to_string()),
+    };
+
+    jwks.validate_github_token(jwt, &config)
         .map_err(|e| eyre::eyre!("Failed to validate JWT: {e}"))?;
     Ok(())
 }
@@ -174,7 +175,7 @@ async fn get_pull_request_id(
     let json = res.json::<serde_json::Value>().await?;
     let pull_request_id = json["data"]["repository"]["pullRequest"]["id"]
         .as_str()
-        .context("Failed to get pull request id")?;
+        .ok_or(eyre::eyre!("Failed to get pull request id"))?;
 
     Ok(pull_request_id.to_string())
 }

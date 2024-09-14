@@ -1,13 +1,11 @@
 use axum::{
     extract::State,
-    response::{IntoResponse, Response},
+    response::IntoResponse,
     routing::{get, post},
     Json,
 };
-use cja::app_state;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
-use tracing::info;
 
 use crate::{
     github::{get_access_token, validate_github_oidc_jwt, GithubPr},

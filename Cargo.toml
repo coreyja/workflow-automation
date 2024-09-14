@@ -17,5 +17,5 @@ axum-macros = "0.4.1"
 chrono = "0.4.38"
 jsonwebtoken = "9"
 reqwest = { version = "0.12.7", features = ["json"] }
-github-oidc = "0.1.6"
+github-oidc = "0.2.0"
 eyre = "0.6.12"
