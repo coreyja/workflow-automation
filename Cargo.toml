@@ -17,5 +17,5 @@ axum-macros = "0.4.1"
 chrono = "0.4.38"
 jsonwebtoken = "9"
 reqwest = { version = "0.12.7", features = ["json"] }
-github-oidc = { version = "0.2.0", git = "https://github.com/coreyja/github-oidc", branch = "ca/main/fix-claims" }
+github-oidc = { git = "https://github.com/coreyja/github-oidc", branch = "ca/main/fix-claims" }
 eyre = "0.6.12"
