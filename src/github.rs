@@ -105,7 +105,7 @@ pub async fn validate_github_oidc_jwt(jwt: &str) -> cja::Result<()> {
         .context("Failed to get JWTs")?;
 
     let config = GitHubOIDCConfig {
-        audience: None,
+        audience: Some("https://github.com/coreyja".to_string()),
         repository: Some("coreyja/coreyja.com".to_string()),
         repository_owner: Some("coreyja".to_string()),
     };
